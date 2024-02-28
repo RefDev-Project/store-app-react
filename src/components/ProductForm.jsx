@@ -10,7 +10,7 @@ function ProductForm({ name, description, imageURL, onChange, onSubmit }) {
           <input className="border border-gray-300 rounded-md p-2 w-96" type="text" placeholder="Description" value={description} onChange={onChange} name="description" />
         </div>
         <div className="mb-2 flex justify-center">
-          <input className="border border-gray-300 rounded-md p-2 w-96" type="link" placeholder="Link Image" value={imageURL} onChange={onChange} name="imageURL" />
+          <input className="border border-gray-300 rounded-md p-2 w-96" type="url" placeholder="Link Image" value={imageURL} onChange={onChange} name="imageURL" />
         </div>
         <div className="mb-2 flex justify-center">
           <input className="border border-gray-300 rounded-md p-2 w-96 hover:bg-gray-200 font-semibold" type="submit" />

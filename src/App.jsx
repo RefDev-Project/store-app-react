@@ -2,22 +2,22 @@ import { useState } from "react";
 import Button from "./components/Button/Button";
 import ProductForm from "./components/ProductForm";
 import ProductList from "./components/ProductList";
-import Products from "./dataProduct/Data.JSX";
+import Products from "./dataProduct/data.js";
 
 function App() {
   const initialStateData = {
+    id: null,
     name: "",
     description: "",
     imageURL: "",
   };
 
   const [products, setProducts] = useState(Products);
-
   const [data, setData] = useState(initialStateData);
-  const { name, description, imageURL } = data;
+  console.log(data);
+  const { id, name, description, imageURL } = data;
 
   const [showForm, setShowForm] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState(null);
 
   function handleShowForm() {
     setShowForm(!showForm);
@@ -26,22 +26,28 @@ function App() {
   function handleOnChange(e) {
     setData({
       ...data,
-      id: products.length + 1,
       [e.target.name]: e.target.value,
     });
   }
 
   function handleOnSubmit(e) {
     e.preventDefault();
-    setProducts([...products, data]);
+    if (id) {
+      // Jika ID produk sudah ada, ini adalah mode edit
+      const updatedProducts = products.map((product) => (product.id === id ? data : product));
+      setProducts(updatedProducts);
+    } else {
+      // Jika ID produk tidak ada, tambahkan produk baru
+      setProducts([...products, { ...data, id: products.length + 1 }]);
+    }
     setData(initialStateData);
+    setShowForm(false);
   }
 
   function handleEdit(productId) {
-    const selectedProduct = products.find((product) => product.id === productId);
-    setData(selectedProduct);
+    const productToEdit = products.find((product) => product.id === productId);
+    setData(productToEdit);
     setShowForm(true);
-    setSelectedProductId(productId);
   }
 
   function handleDelete(productId) {
@@ -72,11 +78,11 @@ function App() {
           />
         </svg>
       </Button>
-      {showForm && <ProductForm name={name} description={description} imageURL={imageURL} onChange={handleOnChange} onSubmit={handleOnSubmit} />}
+      {showForm && <ProductForm id={id} name={name} description={description} imageURL={imageURL} onChange={handleOnChange} onSubmit={handleOnSubmit} />}
       <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-        {products.map((product) => {
-          return <ProductList key={product.id} name={product.name} description={product.description} image={product.image} onHandleEdit={() => handleEdit(product.id)} onHandleDelete={() => handleDelete(product.id)} />;
-        })}
+        {products.map((product) => (
+          <ProductList key={product.id} name={product.name} description={product.description} image={product.image} onHandleEdit={() => handleEdit(product.id)} onHandleDelete={() => handleDelete(product.id)} />
+        ))}
       </div>
     </div>
   );
