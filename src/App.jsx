@@ -41,7 +41,6 @@ function App() {
       setProducts([...products, { ...data, id: products.length + 1 }]);
     }
     setData(initialStateData);
-    setShowForm(false);
   }
 
   function handleEdit(productId) {
