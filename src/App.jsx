@@ -1,23 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./components/Button/Button";
 import ProductForm from "./components/ProductForm";
 import ProductList from "./components/ProductList";
-import Products from "./dataProduct/data.js";
+import { createDataProductsApi, deleteDataProductsApi, editDataProductsApi, fetchDataProductsApi, updateDataProductsApi } from "./api/productsApi";
 
 function App() {
   const initialStateData = {
-    id: null,
+    id: undefined,
     name: "",
     description: "",
     imageURL: "",
   };
 
-  const [products, setProducts] = useState(Products);
+  const [products, setProducts] = useState([]);
   const [data, setData] = useState(initialStateData);
-  console.log(data);
   const { id, name, description, imageURL } = data;
 
   const [showForm, setShowForm] = useState(false);
+
+  async function fetchData() {
+    const response = await fetchDataProductsApi();
+    setProducts(response.data);
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   function handleShowForm() {
     setShowForm(!showForm);
@@ -30,28 +38,44 @@ function App() {
     });
   }
 
-  function handleOnSubmit(e) {
-    e.preventDefault();
-    if (id) {
-      // Jika ID produk sudah ada, ini adalah mode edit
-      const updatedProducts = products.map((product) => (product.id === id ? data : product));
-      setProducts(updatedProducts);
-    } else {
-      // Jika ID produk tidak ada, tambahkan produk baru
-      setProducts([...products, { ...data, id: products.length + 1 }]);
+  async function handleOnSubmit(e) {
+    try {
+      e.preventDefault();
+      if (id) {
+        // Jika ID produk sudah ada, ini adalah mode edit
+        const response = await updateDataProductsApi(id, data);
+        const updatedProducts = products.map((product) => (product.id === id ? response.data : product));
+        setProducts(updatedProducts);
+      } else {
+        // Jika ID produk tidak ada, tambahkan produk baru
+        const response = await createDataProductsApi(data);
+        const newProduct = { ...response.data, id: response.data.id };
+        setProducts([...products, newProduct]);
+      }
+      setData(initialStateData);
+    } catch (error) {
+      console.error(error.message);
     }
-    setData(initialStateData);
   }
 
-  function handleEdit(productId) {
-    const productToEdit = products.find((product) => product.id === productId);
-    setData(productToEdit);
-    setShowForm(true);
+  async function handleEdit(productId) {
+    try {
+      const response = await editDataProductsApi(productId);
+      setData(response.data);
+      setShowForm(true);
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 
-  function handleDelete(productId) {
-    const newProducts = products.filter((product) => product.id !== productId);
-    setProducts(newProducts);
+  async function handleDelete(productId) {
+    try {
+      await deleteDataProductsApi(productId);
+      const newProducts = products.filter((product) => product.id !== productId);
+      setProducts(newProducts);
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 
   return (
